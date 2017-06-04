@@ -1,0 +1,57 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "volumes": [
+    {
+      "name": "nginx-proxy-conf",
+      "host": {
+        "sourcePath": "/var/app/current/proxy/conf.d"
+      }
+    },
+    {
+      "name": "jenkins_home",
+      "host": {
+        "sourcePath": "/var/jenkins/jenkins_home"
+      }
+    }
+  ],
+  "containerDefinitions": [
+    {
+      "name": "jenkins",
+      "image": "jenkins:latest",
+      "essential": true,
+      "memory": 768,
+      "mountPoints": [
+        {
+          "sourceVolume": "jenkins_home",
+          "containerPath": "/var/jenkins_home"
+        }
+      ]
+    },
+    {
+      "name": "nginx-proxy",
+      "image": "nginx",
+      "essential": true,
+      "memory": 128,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 80
+        }
+      ],
+      "links": [
+        "jenkins"
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "nginx-proxy-conf",
+          "containerPath": "/etc/nginx/conf.d",
+          "readOnly": true
+        },
+        {
+          "sourceVolume": "awseb-logs-nginx-proxy",
+          "containerPath": "/var/log/nginx"
+        }
+      ]
+    }
+  ]
+}
